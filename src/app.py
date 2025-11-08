@@ -18,6 +18,8 @@ if 'current_video_title' not in st.session_state:
     st.session_state.current_video_title = ""
 if 'search_executed' not in st.session_state:
     st.session_state.search_executed = False
+if 'active_videos' not in st.session_state:
+    st.session_state.active_videos = [] # List of video dicts: {'video_id', 'title', 'thumbnail_url'}
 
 # --- コールバック関数 ---
 def sync_memo():
@@ -30,7 +32,7 @@ def sync_memo():
 # --- サイドバー ---
 st.sidebar.title("動画検索")
 search_keyword = st.sidebar.text_input("検索キーワードを入力")
-search_button = st.sidebar.button("検索")
+search_button = st.sidebar.button("検索", use_container_width=True)
 
 if search_button:
     st.session_state.search_executed = True
@@ -41,18 +43,20 @@ if search_button:
 
 # 検索結果の表示
 if st.session_state.search_executed:
-    st.sidebar.write(f"「{st.session_state.get('search_keyword', '')}」の検索結果:")
+    st.sidebar.info(f"「`{st.session_state.get('search_keyword', '')}`」の検索結果:")
     search_results = st.session_state.get('search_results', [])
     if search_results:
         for video in search_results:
-            st.sidebar.image(video["thumbnail_url"], width=120)
-            if st.sidebar.button(video["title"], key=video["video_id"]):
+            st.sidebar.image(video["thumbnail_url"], use_container_width=True)
+
+            if st.sidebar.button(video["title"], key=video["video_id"], use_container_width=True):
                 st.session_state.current_video_id = video["video_id"]
                 st.session_state.current_video_title = video["title"]
                 if video["video_id"] not in st.session_state.learning_data:
                     st.session_state.learning_data[video["video_id"]] = {"summary": "", "memo": ""}
                 st.session_state.memo_widget = st.session_state.learning_data[video["video_id"]]["memo"]
                 st.rerun()
+            st.sidebar.divider()
     else:
         st.sidebar.info("検索結果がありません。")
 

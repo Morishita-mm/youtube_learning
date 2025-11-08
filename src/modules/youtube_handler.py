@@ -98,7 +98,7 @@ def search_videos(keyword: str, max_results: int = 10):
                 {
                     "video_id": item["id"]["videoId"],
                     "title": item["snippet"]["title"],
-                    "thumbnail_url": item["snippet"]["thumbnails"]["default"]["url"],
+                    "thumbnail_url": item["snippet"]["thumbnails"]["medium"]["url"],
                 }
                 for item in search_result
             ]
