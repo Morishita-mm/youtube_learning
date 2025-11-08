@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "id": {
+        "videoId": "mock_video_id_1"
+      },
+      "snippet": {
+        "title": "【テスト用動画1】Python入門",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/mock_video_id_1/default.jpg"
+          }
+        },
+        "channelTitle": "テストチャンネル1"
+      }
+    },
+    {
+      "id": {
+        "videoId": "mock_video_id_2"
+      },
+      "snippet": {
+        "title": "【テスト用動画2】Streamlitの使い方",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/mock_video_id_2/default.jpg"
+          }
+        },
+        "channelTitle": "テストチャンネル2"
+      }
+    },
+    {
+      "id": {
+        "videoId": "mock_video_id_3"
+      },
+      "snippet": {
+        "title": "【テスト用動画3】Gemini APIの活用法",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/mock_video_id_3/default.jpg"
+          }
+        },
+        "channelTitle": "テストチャンネル3"
+      }
+    }
+  ]
+}
