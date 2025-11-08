@@ -11,3 +11,4 @@ venv/
 # image
 *.png
 *.jp*g
+!screenshot.png
