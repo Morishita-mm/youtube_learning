@@ -8,5 +8,6 @@ __pycache__/
 venv/
 .venv/
 
-# Mock data
-mock_data/
+# image
+*.png
+*.jp*g

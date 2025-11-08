@@ -12,10 +12,10 @@ WORKDIR /app
 RUN pip install --no-cache-dir Flask
 
 # アプリケーションコードをコピー
-COPY . .
+COPY ./tests ./tests
 
 # モックサーバーのポートを公開
 EXPOSE 5001
 
 # モックサーバーの起動コマンド
-CMD ["python", "mock_server.py"]
+CMD ["python", "tests/mock_server.py"]
