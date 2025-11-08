@@ -1,4 +1,5 @@
 import streamlit as st
+from modules.youtube_handler import search_videos
 
 # ページのレイアウトをワイドモードに設定し、画面幅全体に表示領域を広げる
 st.set_page_config(layout="wide")
@@ -15,6 +16,10 @@ search_button = st.sidebar.button("検索")
 if search_button:
     st.session_state.search_executed = True
     st.session_state.search_keyword = search_keyword
+    # APIを呼び出して結果をセッションに保存
+    with st.spinner("検索中..."):
+        st.session_state.search_results = search_videos(search_keyword)
+    
     # 新しい検索が始まったら、選択された動画とメモ、要約をリセット
     if 'selected_video' in st.session_state:
         del st.session_state['selected_video']
@@ -28,21 +33,21 @@ if search_button:
 # 検索が実行された後であれば、検索結果を表示
 if 'search_executed' in st.session_state and st.session_state.search_executed:
     st.sidebar.write(f"「{st.session_state.search_keyword}」の検索結果:")
-    # TODO: YouTube検索処理を実装
     
-    # --- モック検索結果 ---
-    st.sidebar.subheader("検索結果")
-    for i in range(3):
-        mov_name = f"テスト用動画{i+1}"
-        st.sidebar.image(f"https://placehold.co/120x90.png?text=Thumbnail+{i+1}", width=120)
-        if st.sidebar.button(mov_name, key=f"select_{i}"):
-            st.session_state['selected_video'] = f"mock_video_id_{i+1}"
-            st.session_state['selected_video_title'] = f"テスト用動画{i+1}"
-            # メモ入力と要約をリセット
-            st.session_state.memo_input = ""
-            st.session_state.summary = ""
-            # メインエリアを更新するために再実行
-            st.rerun()
+    search_results = st.session_state.get('search_results', [])
+    if search_results:
+        for video in search_results:
+            st.sidebar.image(video["thumbnail_url"], width=120)
+            if st.sidebar.button(video["title"], key=video["video_id"]):
+                st.session_state['selected_video'] = video["video_id"]
+                st.session_state['selected_video_title'] = video["title"]
+                # メモ入力と要約をリセット
+                st.session_state.memo_input = ""
+                st.session_state.summary = ""
+                # メインエリアを更新するために再実行
+                st.rerun()
+    else:
+        st.sidebar.info("検索結果がありません。")
 
 
 # --- メインエリア ---
@@ -69,13 +74,14 @@ if 'selected_video' in st.session_state:
             with st.spinner("要約を生成中..."):
                 # TODO: Gemini要約処理を実装
                 st.session_state.summary = "これはAIによって生成された動画の要約です。（このテキストは編集できません）"
+                # st.rerun() # ボタンの処理が終わると自動で再実行されるため、必須ではない
 
         # 要約が生成されていれば、編集不可で表示
         if st.session_state.summary:
             st.text_area(
                 "要約結果",
                 value=st.session_state.summary,
-                height=500,
+                height=250,
                 disabled=True
             )
 
