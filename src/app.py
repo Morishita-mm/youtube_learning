@@ -9,6 +9,11 @@ st.set_page_config(layout="wide")
 # アプリケーションのタイトル
 st.title("YouTube動画学習アシスタント")
 
+# --- コールバック関数 ---
+def sync_memo():
+    """text_areaウィジェットの変更をセッション状態に同期する"""
+    st.session_state.memo_input = st.session_state.memo_widget
+
 # --- サイドバー ---
 st.sidebar.title("動画検索")
 search_keyword = st.sidebar.text_input("検索キーワードを入力")
@@ -95,12 +100,28 @@ if 'selected_video' in st.session_state:
         # --- メモ機能 ---
         st.subheader("メモ")
         
-        # st.text_areaのkeyに対応するセッション変数を安全に初期化
+        # プレビューモードの切り替えトグル
+        preview_mode = st.toggle("プレビューモード", key="preview_mode")
+
+        # メモ入力のセッション変数を安全に初期化
         if 'memo_input' not in st.session_state:
             st.session_state.memo_input = ""
-            
-        st.text_area("動画を視聴しながらメモを取る", height=350, key="memo_input")
         
+        if preview_mode:
+            # プレビューモードの場合
+            with st.container(border=True):
+                st.markdown(st.session_state.memo_input, unsafe_allow_html=True)
+        else:
+            # 記入モードの場合
+            st.text_area(
+                "動画を視聴しながらメモを取る",
+                value=st.session_state.memo_input,
+                height=350,
+                key="memo_widget", # ウィジェット専用のキー
+                on_change=sync_memo, # 変更時にコールバックを呼び出す
+                label_visibility="collapsed"
+            )
+
         # ファイル名に使えない文字を置換
         safe_title = re.sub(r'[\\/*?:"<>|]', "-", st.session_state.selected_video_title)
         
