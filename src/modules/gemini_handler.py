@@ -21,13 +21,21 @@ def summarize_text(text: str, language: str = "Japanese"):
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel('gemini-flash-latest') # または 'gemini-pro'
         
-        prompt = f"""以下の文章を{language}で簡潔に要約してください。
+        prompt = f"""あなたはYouTube動画の学習を助けるアシスタントです。
+以下の動画のトランスクリプトを読み、動画の内容を過不足なく理解し、学習者が動画を見ながら内容を把握しやすいように、時系列順に箇条書きで要約してください。
+
+要約は以下の点に注意して作成してください。
+- 動画の主要なトピック、重要な概念、結論を網羅すること。
+- 各箇条書きは簡潔かつ具体的に記述すること。
+- 時系列に沿って、動画の進行を追うように構成すること。
+- 出力は{language}で行うこと。
 
 ---
 {text}
 ---
 
 要約:
+-
 """
         
         response = model.generate_content(prompt)
