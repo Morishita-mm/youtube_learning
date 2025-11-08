@@ -1,5 +1,6 @@
 import streamlit as st
-from modules.youtube_handler import search_videos
+from modules.youtube_handler import search_videos, get_transcript_text
+from modules.gemini_handler import summarize_text
 
 # ページのレイアウトをワイドモードに設定し、画面幅全体に表示領域を広げる
 st.set_page_config(layout="wide")
@@ -72,17 +73,21 @@ if 'selected_video' in st.session_state:
 
         if st.button("この動画を要約する"):
             with st.spinner("要約を生成中..."):
-                # TODO: Gemini要約処理を実装
-                st.session_state.summary = "これはAIによって生成された動画の要約です。（このテキストは編集できません）"
-                # st.rerun() # ボタンの処理が終わると自動で再実行されるため、必須ではない
+                transcript = get_transcript_text(video_id)
+                if transcript:
+                    summary = summarize_text(transcript)
+                    if summary:
+                        st.session_state.summary = summary
+                    else:
+                        st.error("要約の生成に失敗しました。")
+                else:
+                    st.error("この動画の字幕（トランスクリプト）を取得できませんでした。")
 
         # 要約が生成されていれば、編集不可で表示
         if st.session_state.summary:
-            st.text_area(
-                "要約結果",
-                value=st.session_state.summary,
-                height=250,
-                disabled=True
+            st.markdown(
+                st.session_state.summary,
+                unsafe_allow_html=True
             )
 
     with col2:

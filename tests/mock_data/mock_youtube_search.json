@@ -2,44 +2,44 @@
   "items": [
     {
       "id": {
-        "videoId": "mock_video_id_1"
+        "videoId": "H3KnMyojEQU"
       },
       "snippet": {
-        "title": "【テスト用動画1】Python入門",
+        "title": "【テスト用動画】Google I/O 2023 Keynote",
         "thumbnails": {
           "default": {
-            "url": "https://i.ytimg.com/vi/mock_video_id_1/default.jpg"
+            "url": "https://i.ytimg.com/vi/u46c_n_M_sE/default.jpg"
           }
         },
-        "channelTitle": "テストチャンネル1"
+        "channelTitle": "Google"
       }
     },
     {
       "id": {
-        "videoId": "mock_video_id_2"
+        "videoId": "M-p9J_I3-sI"
       },
       "snippet": {
-        "title": "【テスト用動画2】Streamlitの使い方",
+        "title": "【テスト用動画】Python for Beginners",
         "thumbnails": {
           "default": {
-            "url": "https://i.ytimg.com/vi/mock_video_id_2/default.jpg"
+            "url": "https://i.ytimg.com/vi/M-p9J_I3-sI/default.jpg"
           }
         },
-        "channelTitle": "テストチャンネル2"
+        "channelTitle": "freeCodeCamp.org"
       }
     },
     {
       "id": {
-        "videoId": "mock_video_id_3"
+        "videoId": "vQjiNlt_S2I"
       },
       "snippet": {
-        "title": "【テスト用動画3】Gemini APIの活用法",
+        "title": "【テスト用動画】Streamlit入門",
         "thumbnails": {
           "default": {
-            "url": "https://i.ytimg.com/vi/mock_video_id_3/default.jpg"
+            "url": "https://i.ytimg.com/vi/vQjiNlt_S2I/default.jpg"
           }
         },
-        "channelTitle": "テストチャンネル3"
+        "channelTitle": "J-Tech[ジェイテック]"
       }
     }
   ]
