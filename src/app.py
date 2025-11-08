@@ -9,128 +9,111 @@ st.set_page_config(layout="wide")
 # アプリケーションのタイトル
 st.title("YouTube動画学習アシスタント")
 
+# --- セッションデータの初期化 ---
+if 'learning_data' not in st.session_state:
+    st.session_state.learning_data = {} # {video_id: {"summary": str, "memo": str}}
+if 'current_video_id' not in st.session_state:
+    st.session_state.current_video_id = None
+if 'current_video_title' not in st.session_state:
+    st.session_state.current_video_title = ""
+if 'search_executed' not in st.session_state:
+    st.session_state.search_executed = False
+
 # --- コールバック関数 ---
 def sync_memo():
-    """text_areaウィジェットの変更をセッション状態に同期する"""
-    st.session_state.memo_input = st.session_state.memo_widget
+    """text_areaウィジェットの変更を現在の動画のメモとしてセッションに同期する"""
+    if st.session_state.current_video_id and "memo_widget" in st.session_state:
+        video_id = st.session_state.current_video_id
+        if video_id in st.session_state.learning_data:
+            st.session_state.learning_data[video_id]["memo"] = st.session_state.memo_widget
 
 # --- サイドバー ---
 st.sidebar.title("動画検索")
 search_keyword = st.sidebar.text_input("検索キーワードを入力")
 search_button = st.sidebar.button("検索")
 
-# 検索ボタンが押されたら、その状態をセッションに保存
 if search_button:
     st.session_state.search_executed = True
     st.session_state.search_keyword = search_keyword
-    # APIを呼び出して結果をセッションに保存
     with st.spinner("検索中..."):
         st.session_state.search_results = search_videos(search_keyword)
-    
-    # 新しい検索が始まったら、選択された動画とメモ、要約をリセット
-    if 'selected_video' in st.session_state:
-        del st.session_state['selected_video']
-        del st.session_state['selected_video_title']
-    if 'memo_input' in st.session_state:
-        del st.session_state['memo_input']
-    if 'summary' in st.session_state:
-        del st.session_state['summary']
+    st.session_state.current_video_id = None
 
-
-# 検索が実行された後であれば、検索結果を表示
-if 'search_executed' in st.session_state and st.session_state.search_executed:
-    st.sidebar.write(f"「{st.session_state.search_keyword}」の検索結果:")
-    
+# 検索結果の表示
+if st.session_state.search_executed:
+    st.sidebar.write(f"「{st.session_state.get('search_keyword', '')}」の検索結果:")
     search_results = st.session_state.get('search_results', [])
     if search_results:
         for video in search_results:
             st.sidebar.image(video["thumbnail_url"], width=120)
             if st.sidebar.button(video["title"], key=video["video_id"]):
-                st.session_state['selected_video'] = video["video_id"]
-                st.session_state['selected_video_title'] = video["title"]
-                # メモ入力と要約をリセット
-                st.session_state.memo_input = ""
-                st.session_state.summary = ""
-                # メインエリアを更新するために再実行
+                st.session_state.current_video_id = video["video_id"]
+                st.session_state.current_video_title = video["title"]
+                if video["video_id"] not in st.session_state.learning_data:
+                    st.session_state.learning_data[video["video_id"]] = {"summary": "", "memo": ""}
+                st.session_state.memo_widget = st.session_state.learning_data[video["video_id"]]["memo"]
                 st.rerun()
     else:
         st.sidebar.info("検索結果がありません。")
 
-
 # --- メインエリア ---
 st.header("学習エリア")
 
-if 'selected_video' in st.session_state:
-    # 画面を2つの列に分割
+video_id = st.session_state.get('current_video_id')
+
+if video_id:
+    current_data = st.session_state.learning_data.get(video_id, {"summary": "", "memo": ""})
+    
     col1, col2 = st.columns(2)
 
     with col1:
-        # --- 動画再生 ---
-        st.subheader(f"選択中の動画: {st.session_state['selected_video_title']}")
-        video_id = st.session_state['selected_video']
+        st.subheader(f"選択中の動画: {st.session_state.current_video_title}")
         st.video(f"https://www.youtube.com/watch?v={video_id}")
 
-        # --- AI要約 ---
         st.subheader("AIによる要約")
-        
-        # 要約のセッション状態を初期化
-        if 'summary' not in st.session_state:
-            st.session_state.summary = ""
-
         if st.button("この動画を要約する"):
             with st.spinner("要約を生成中..."):
                 transcript = get_transcript_text(video_id)
                 if transcript:
                     summary = summarize_text(transcript)
                     if summary:
-                        st.session_state.summary = summary
+                        st.session_state.learning_data[video_id]["summary"] = summary
                     else:
                         st.error("要約の生成に失敗しました。")
                 else:
                     st.error("この動画の字幕（トランスクリプト）を取得できませんでした。")
-
-        # 要約が生成されていれば、編集不可で表示
-        if st.session_state.summary:
-            st.markdown(
-                st.session_state.summary,
-                unsafe_allow_html=True
-            )
+        
+        if current_data.get("summary"):
+            st.markdown(current_data["summary"])
 
     with col2:
-        # --- メモ機能 ---
         st.subheader("メモ")
-        
-        # プレビューモードの切り替えトグル
         preview_mode = st.toggle("プレビューモード", key="preview_mode")
-
-        # メモ入力のセッション変数を安全に初期化
-        if 'memo_input' not in st.session_state:
-            st.session_state.memo_input = ""
         
+        if 'preview_mode' in st.session_state and not st.session_state.preview_mode:
+             if video_id in st.session_state.learning_data:
+                st.session_state.memo_widget = st.session_state.learning_data[video_id]["memo"]
+
         if preview_mode:
-            # プレビューモードの場合
             with st.container(border=True):
-                st.markdown(st.session_state.memo_input, unsafe_allow_html=True)
+                st.markdown(current_data.get("memo", ""))
         else:
-            # 記入モードの場合
             st.text_area(
                 "動画を視聴しながらメモを取る",
-                value=st.session_state.memo_input,
                 height=350,
-                key="memo_widget", # ウィジェット専用のキー
-                on_change=sync_memo, # 変更時にコールバックを呼び出す
+                key="memo_widget",
+                on_change=sync_memo,
                 label_visibility="collapsed"
             )
 
-        # ファイル名に使えない文字を置換
-        safe_title = re.sub(r'[\\/*?:"<>|]', "-", st.session_state.selected_video_title)
-        
+        video_title = st.session_state.get("current_video_title", "Untitled")
+        safe_title = re.sub(r'[\\/*?:"<>|]', "-", video_title)
+        memo_data = current_data.get("memo", "")
         st.download_button(
             label="メモをダウンロード",
-            data=st.session_state.memo_input,
+            data=memo_data,
             file_name=f"{safe_title}_memo.md",
             mime="text/markdown",
         )
-
 else:
     st.info("サイドバーから学習したい動画を検索・選択してください。")
