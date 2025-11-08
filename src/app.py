@@ -1,6 +1,7 @@
 import streamlit as st
 from modules.youtube_handler import search_videos, get_transcript_text
 from modules.gemini_handler import summarize_text
+import re
 
 # ページのレイアウトをワイドモードに設定し、画面幅全体に表示領域を広げる
 st.set_page_config(layout="wide")
@@ -100,9 +101,15 @@ if 'selected_video' in st.session_state:
             
         st.text_area("動画を視聴しながらメモを取る", height=350, key="memo_input")
         
-        if st.button("メモを保存"):
-            # TODO: メモ保存処理を実装 (st.session_state.memo_input を使う)
-            st.success("メモを保存しました。")
+        # ファイル名に使えない文字を置換
+        safe_title = re.sub(r'[\\/*?:"<>|]', "-", st.session_state.selected_video_title)
+        
+        st.download_button(
+            label="メモをダウンロード",
+            data=st.session_state.memo_input,
+            file_name=f"{safe_title}_memo.md",
+            mime="text/markdown",
+        )
 
 else:
     st.info("サイドバーから学習したい動画を検索・選択してください。")
