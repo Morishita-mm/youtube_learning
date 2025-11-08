@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - API_BASE_URL=http://mock-server:5001
+    tty: true
+    stdin_open: true
+    depends_on:
+      - mock-server
+
+  mock-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    volumes:
+      - .:/app
+    ports:
+      - "5001:5001"
