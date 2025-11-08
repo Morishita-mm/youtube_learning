@@ -88,7 +88,20 @@ if video_id:
                     st.error("この動画の字幕（トランスクリプト）を取得できませんでした。")
         
         if current_data.get("summary"):
-            st.markdown(current_data["summary"])
+            st.markdown("""
+                <style>
+                    .summary-scrollable-area {
+                        max-height: 350px; /* メモ欄と同じ高さに設定 */
+                        overflow-y: scroll;
+                        border: 1px solid rgba(49, 51, 63, 0.2); /* Streamlitのデフォルトボーダーに合わせる */
+                        border-radius: 0.25rem; /* Streamlitのデフォルトの角丸に合わせる */
+                        padding: 1rem; /* Streamlitのデフォルトのパディングに合わせる */
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+            # st.containerで囲み、その中にスクロール可能なdivを配置
+            with st.container():
+                st.markdown(f'<div class="summary-scrollable-area">{current_data["summary"]}</div>', unsafe_allow_html=True)
 
     with col2:
         st.subheader("メモ")
